@@ -1,0 +1,148 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PROCESSOR_SERVICE_URL=http://processor:8001
+      - LOG_LEVEL=INFO
+    depends_on:
+      - processor
+    networks:
+      - pii-network
+    restart: unless-stopped
+    volumes:
+      - logs:/var/log/pii-guardian
+
+  # Document Processing Service
+  processor:
+    build:
+      context: .
+      dockerfile: docker/processor/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - REGEX_SERVICE_URL=http://regex:8002
+      - ML_SERVICE_URL=http://ml-models:8003
+      - TRANSFORMATION_SERVICE_URL=http://transformation:8004
+      - AGGREGATOR_SERVICE_URL=http://aggregator:8005
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - LOG_LEVEL=INFO
+    depends_on:
+      - regex
+      - ml-models
+      - transformation
+      - aggregator
+      - rabbitmq
+    networks:
+      - pii-network
+    restart: unless-stopped
+    volumes:
+      - logs:/var/log/pii-guardian
+      - doc-storage:/tmp/pii-guardian
+
+  # Regex Detection Service
+  regex:
+    build:
+      context: .
+      dockerfile: docker/regex/Dockerfile
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - LOG_LEVEL=INFO
+    depends_on:
+      - rabbitmq
+    networks:
+      - pii-network
+    restart: unless-stopped
+    volumes:
+      - logs:/var/log/pii-guardian
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+
+  # ML Model Service
+  ml-models:
+    build:
+      context: .
+      dockerfile: docker/ml-models/Dockerfile
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - DEVICE=cpu
+      - LOG_LEVEL=INFO
+    depends_on:
+      - rabbitmq
+    networks:
+      - pii-network
+    restart: unless-stopped
+    volumes:
+      - logs:/var/log/pii-guardian
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+    # Uncomment for GPU support
+    # runtime: nvidia
+    # environment:
+    #   - NVIDIA_VISIBLE_DEVICES=all
+
+  # Transformation Service
+  transformation:
+    build:
+      context: .
+      dockerfile: docker/transformation/Dockerfile
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - LOG_LEVEL=INFO
+    depends_on:
+      - rabbitmq
+    networks:
+      - pii-network
+    restart: unless-stopped
+    volumes:
+      - logs:/var/log/pii-guardian
+
+  # Result Aggregation Service
+  aggregator:
+    build:
+      context: .
+      dockerfile: docker/aggregator/Dockerfile
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - LOG_LEVEL=INFO
+    depends_on:
+      - rabbitmq
+    networks:
+      - pii-network
+    restart: unless-stopped
+    volumes:
+      - logs:/var/log/pii-guardian
+
+  # RabbitMQ for message queuing
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"  # Management UI
+      - "5672:5672"    # AMQP port
+    networks:
+      - pii-network
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+networks:
+  pii-network:
+    driver: bridge
+
+volumes:
+  logs:
