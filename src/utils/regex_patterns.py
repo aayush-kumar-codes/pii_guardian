@@ -1,5 +1,6 @@
-import re
-from typing import Dict, Pattern, List
+from typing import Dict, Pattern, List, Union
+import regex as re
+
 
 __all__ = ["PIIRegexPatterns"]
 
@@ -34,7 +35,7 @@ class PIIRegexPatterns:
     }
 
     @classmethod
-    def get_pattern(cls, pattern_name: str) -> Pattern | None:
+    def get_pattern(cls, pattern_name: str) -> Union[Pattern, None]:
         """
         Retrieve a specific PII regex pattern.
 

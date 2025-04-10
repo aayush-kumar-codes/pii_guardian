@@ -7,7 +7,7 @@ from typing import Dict, Any, List
 import traceback
 
 from utils.logger import setup_logger
-from utils.presidio_integration import detect_with_presidio, init_presidio_analyzer
+from utils.presidio_analyzer import detect_with_presidio, init_presidio_analyzer
 from utils.entity_recognition import detect_with_ner, load_ner_model, load_model
 
 # Set up logger

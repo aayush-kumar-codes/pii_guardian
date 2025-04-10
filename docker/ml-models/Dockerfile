@@ -17,7 +17,7 @@ RUN pip install transformers
 
 # Download spaCy models
 COPY src/models/download_models.py .
-RUN python src/models/download_models.py
+RUN python download_models.py
 
 COPY src/ml_service /app/ml_service
 COPY src/models /app/models

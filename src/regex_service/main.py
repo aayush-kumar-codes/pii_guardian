@@ -9,6 +9,7 @@ from utils.logger import setup_logger
 from utils.regex_patterns import PIIRegexPatterns
 from utils.international_patterns import InternationalPIIPatterns
 
+
 # Set up logger
 logger = setup_logger(__name__, log_file="/var/log/pii-guardian/regex.log")
 

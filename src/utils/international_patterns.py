@@ -1,5 +1,5 @@
-import re
 from typing import Dict, Pattern, List, Any
+import regex as re
 
 class InternationalPIIPatterns:
     """
@@ -27,7 +27,7 @@ class InternationalPIIPatterns:
         },
         'argentina_drivers_license': {
             'pattern': re.compile(r'(?<![-−―–——@&*$!?%]|\d\.)(?!(\d)\1[-−―–——.·]?\1{3}[-−―–——.·]?\1{3}|1(?:0[-−―–——.·]?101[-−―–——.·]?010|2[-−―–——.·]?345[-−―–——.·]?678))\b[1-9]\d([-−―–——.·]?)\d{3}\2\d{3}\b(?![-−―–——@&*$!?%]|[\-.]\d)'),
-            'context': re.compile(r'(?i)(?:(?:\b|_)L(?:icencia(?:[\s_]{0,3}nacional)?[\s_]{0,3}de[\s_]{0,3}conducir(?:[\s_]{0,3}(?:arg(?:entina|\b)|digital(?:[\s_]{0,3}(?:de[\s_]{0,3})?arg(?:entina|\b))?)?)?|ncd?(?:(?:[\s_]{0,3}de)?[\s_]{0,3}arg(?:entina)?|(?:\b|_)))|N(?:[°º˚]|[uúÚ]mero)(?:[\s_]{0,3}(?:de[\s_]{0,3})?licencia(?:[\s_]{0,3}Nacional)?[\s_]{0,3}de[\s_]{0,3}conducir(?:(?:[\s_]{0,3}de)?[\s_]{0,3}arg(?:entina)?)?)|driv(?:er\'?s|ing)[\s_]{0,3}licenses?(?:[\s_]{0,3}(?:[#№]|n(?:[º°]|[or](?:\b|_)|umbers?)))?(?:[\s_]{0,3}(?:argentina|\(argentina\)))|arg(?:entin(?:a|ian))?[\s_]{0,3}driv(?:er\'?s|ing)[\s_]{0,3}licenses?(?:[\s_]{0,3}(?:[#№]|n(?:[º°]|[or](?:\b|_)|umbers?)))?'),
+            'context': re.compile(r'\b(?i)(?:pas(?:aporte[\-‐‑‒–—―–\s ]{0,3}(?:arg(?:entino)?|de[\-‐‑‒–—―–\s ]{0,3}la[\-‐‑‒–—―–\s ]{0,3}rep[úuÚ]blica[\-‐‑‒–—―–\s ]{0,3}argentina)|sport(?:[\s_]{0,3}n(?:[°º˚]|umbers?|o(?:\b|_)))?)|argentin(?:a|ian)[\s_]{0,3}(?:passport|travel[\s_]{0,3}document)(?:[\s_]{0,3}n(?:[°º˚]|umbers?|o(?:\b|_)))?|travel[\s_]{0,3}document(?:[\s_]{0,3}n(?:[°º˚]|umbers?|o(?:\b|_)))?)'),
             'description': 'Argentinian Driver\'s License Number',
             'countries': ['AR'],
             'confidence': 0.75,
