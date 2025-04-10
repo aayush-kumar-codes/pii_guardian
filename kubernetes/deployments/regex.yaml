@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: regex
+  labels:
+    app: regex
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: regex
+  template:
+    metadata:
+      labels:
+        app: regex
+    spec:
+      containers:
+      - name: regex
+        image: pii-guardian/regex:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: RABBITMQ_URL
+          value: "amqp://guest:guest@rabbitmq:5672"
+        - name: LOG_LEVEL
+          value: "INFO"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "300m"
+        volumeMounts:
+        - name: pii-logs
+          mountPath: /var/log/pii-guardian
+      volumes:
+      - name: pii-logs
+        emptyDir: {}

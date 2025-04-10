@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-models
+  labels:
+    app: ml-models
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ml-models
+  template:
+    metadata:
+      labels:
+        app: ml-models
+    spec:
+      containers:
+      - name: ml-models
+        image: pii-guardian/ml-models:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: RABBITMQ_URL
+          value: "amqp://guest:guest@rabbitmq:5672"
+        - name: DEVICE
+          value: "cpu"  # Change to "cuda" for GPU
+        - name: LOG_LEVEL
+          value: "INFO"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "300m"
+          limits:
+            memory: "1Gi"
+            cpu: "600m"
+        volumeMounts:
+        - name: pii-logs
+          mountPath: /var/log/pii-guardian
+        - name: model-cache
+          mountPath: /root/.cache/huggingface
+      volumes:
+      - name: pii-logs
+        emptyDir: {}
+      - name: model-cache
+        emptyDir: {}

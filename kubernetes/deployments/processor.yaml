@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor
+  labels:
+    app: processor
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: processor
+  template:
+    metadata:
+      labels:
+        app: processor
+    spec:
+      containers:
+      - name: processor
+        image: pii-guardian/processor:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+        env:
+        - name: REGEX_SERVICE_URL
+          value: "http://regex:8002"
+        - name: ML_SERVICE_URL
+          value: "http://ml-models:8003"
+        - name: TRANSFORMATION_SERVICE_URL
+          value: "http://transformation:8004"
+        - name: AGGREGATOR_SERVICE_URL
+          value: "http://aggregator:8005"
+        - name: RABBITMQ_URL
+          value: "amqp://guest:guest@rabbitmq:5672"
+        - name: LOG_LEVEL
+          value: "INFO"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"
+        volumeMounts:
+        - name: pii-logs
+          mountPath: /var/log/pii-guardian
+        - name: upload-dir
+          mountPath: /tmp/pii-guardian
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: pii-logs
+        emptyDir: {}
+      - name: upload-dir
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: processor
+spec:
+  selector:
+    app: processor
+  ports:
+  - port: 8001
+    targetPort: 8001
